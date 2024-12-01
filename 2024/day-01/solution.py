@@ -3,6 +3,7 @@
 
 input_file = open("input", "r")
 data=input_file.readlines()
+input_file.close()
 
 left = []
 right = []
