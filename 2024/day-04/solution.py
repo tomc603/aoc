@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import itertools
 
 MATCH_STRING = "XMAS"
 MATCH_LENGTH = len(MATCH_STRING)
@@ -70,7 +69,45 @@ def search(grid, match) -> int:
 
     return count
 
+
+def find_str(grid, match: str) -> int:
+    """
+    Find a string in a two-dimensional array of characters in any of the 8 possible directions.
+    The string may be forwards of backwards.
+    :param grid: two-dimensional array to search
+    :param match: string value to search for
+    :return: Number of instances of the search string found in the grid
+    """
+    count = 0
+    rows = len(grid)
+    cols = len(grid[0]) - 1
+    match_len = len(match)
+    bidi_match = [match, match[::-1]]
+
+    for row in range(rows):
+        for col in range(cols):
+            right, down, right_diag, left_diag = "", "", "", ""
+
+            for i in range(match_len):
+                if col+i < cols: right += grid[row][col+i]
+                if row+i < rows: down += grid[row+i][col]
+                if row+i < rows and col+i < cols: left_diag += grid[row+i][col+i]
+                if row + i < rows and (col+match_len) - (i+1) < cols: right_diag += grid[row+i][(col+match_len) - (i + 1)]
+
+            if right in bidi_match: count += 1
+            if down in bidi_match: count +=1
+            if left_diag in bidi_match: count += 1
+            if right_diag in bidi_match: count += 1
+
+    return count
+
+
 def find_xmas(grid) -> int:
+    """
+    Find "XMAS" forwards and backwards in an X pattern
+    :param grid:
+    :return:
+    """
     count = 0
     rows = len(grid)
     cols = len(grid[0])
@@ -82,8 +119,7 @@ def find_xmas(grid) -> int:
             if (
                     (left_diagonal == "MAS" or left_diagonal == "SAM") and
                     (right_diagonal == "MAS" or right_diagonal == "SAM")
-            ):
-                count += 1
+            ): count += 1
 
     return count
 
@@ -91,8 +127,11 @@ def find_xmas(grid) -> int:
 with open("input", "r") as input_file:
     data = input_file.readlines()
 
-part1_count = search(data, MATCH_STRING)
-print(f"Part 1: {part1_count}")
+part1_recursive = search(data, MATCH_STRING)
+print(f"Part 1 recursive: {part1_recursive}")
+
+part1_forward = find_str(data, MATCH_STRING)
+print(f"Part 1 non-recursive: {part1_forward}")
 
 part2_count = find_xmas(data)
 print(f"Part 2: {part2_count}")
