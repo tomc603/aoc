@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import copy
 
 # Overview:
 # Move the guard through the grid until they reach an edge
@@ -77,19 +78,19 @@ def choose_direction(current: tuple[int, int]) -> tuple[int, int]:
     return DIRECTIONS[(DIRECTIONS.index(current) + 1) % len(DIRECTIONS)]
 
 
-def move_guard(grid: list) -> list[tuple[int, int]]:
+def get_path(grid: list) -> set[tuple[int, int]]:
     """
     Walk the specified grid, returning the traversed path when we reach the edge of the grid.
 
     :param grid: A list of a list of characters representing the floor plan of the lab
-    :return: List of row, column pairs traversed in the lab
+    :return: Set of row, column pairs traversed in the lab
     """
     cur_row, cur_col = find_avatar(grid)
     guard = grid[cur_row][cur_col]
     direction = avatar_to_direction(guard)
     rows = len(grid)
     cols = len(grid[0])
-    positions = list()
+    positions = set()
 
     while True:
         # Shorthand variables to clarity
@@ -97,7 +98,7 @@ def move_guard(grid: list) -> list[tuple[int, int]]:
         next_col = cur_col + direction[1]
         # guard = direction_to_avatar(direction)
 
-        # If we're outside the bounds, break out of the loop and return the list of positions
+        # If we're outside the grid bounds, return the list of positions
         if not (0 <= cur_row < rows and 0 <= cur_col < cols):
             return positions
 
@@ -106,9 +107,65 @@ def move_guard(grid: list) -> list[tuple[int, int]]:
             direction = choose_direction(direction)
             continue
 
-        positions.append((cur_row, cur_col))
-        cur_row += direction[0]
-        cur_col += direction[1]
+        # Add the current position to the visited positions
+        positions.add((cur_row, cur_col))
+        cur_row = next_row
+        cur_col = next_col
+
+
+def will_loop(grid: list[list[str]], obs_row, obs_col) -> bool:
+    """
+    Place an obstacle at the specified row, col position, then walk the grid checking for loops
+
+    :param grid: Lab floor plan to walk
+    :param obs_row: New obstacle row position
+    :param obs_col: New obstacle column position
+    :return: True if a loop is detected, otherwise false.
+    """
+    # Make a copy of the original grid to operate on
+    test_grid = copy.deepcopy(grid)
+
+    cur_row, cur_col = find_avatar(test_grid)
+    direction = avatar_to_direction(test_grid[cur_row][cur_col])
+    rows = len(test_grid)
+    cols = len(test_grid[0])
+
+    # We can't modify the guard's position or they'll notice the paradox
+    if (obs_row, obs_col) == (cur_row, cur_col):
+        return False
+
+    # If the target already has an obstacle, modifying it won't cause a loop
+    if test_grid[obs_row][obs_col] == "#":
+        return False
+
+    # Place the new obstacle in the lab floor plan.
+    test_grid[obs_row][obs_col] = "#"
+
+    seen = set()
+    while True:
+        # Shorthand variables to clarity
+        next_row = cur_row + direction[0]
+        next_col = cur_col + direction[1]
+
+        # If we've already visited this location in the same direction, we're in a loop
+        if (cur_row, cur_col, direction) in seen:
+            return True
+
+        # Add the current location and heading to the visited set
+        seen.add((cur_row, cur_col, direction))
+
+        # If we're outside the grid bounds, we haven't found a loop
+        if not (0 <= next_row < rows and 0 <= next_col < cols):
+            return False
+
+        # Check the next space in the current direction for an in-bounds obstacle
+        if test_grid[next_row][next_col] == "#":
+            direction = choose_direction(direction)
+            continue
+
+        # Move to the next location
+        cur_row = next_row
+        cur_col = next_col
 
 
 def main():
@@ -120,8 +177,15 @@ def main():
     for line in data:
         grid.append(list(line.strip()))
 
-    positions = move_guard(grid)
-    print(f"Number of unique positions visited: {len(set(positions))}")
+    positions = get_path(grid)
+    # Part 1: 4939
+    print(f"Number of unique positions visited: {len(positions)}")
+
+    # Part 2: 1434
+    count = 0
+    for position in positions:
+        count += will_loop(grid, position[0], position[1])
+    print(f"Loops: {count}")
 
 
 main()
