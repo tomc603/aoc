@@ -3,7 +3,6 @@
 import itertools
 from collections import defaultdict
 
-
 TEST_INPUT="""............
 ........0...
 .....0......
@@ -20,7 +19,12 @@ TEST_INPUT="""............
 TEST_LOCATIONS=14
 
 
-def map_grid(grid: list[list[str]]) -> defaultdict[list[tuple[int, int]]]|None:
+def map_grid(grid: list[list[str]]) -> defaultdict[list]:
+    """
+    Walk the grid area searching for antenna frequencies.
+    :param grid: The city play, with antenna locations
+    :return: Dictionary of locations by frequency
+    """
     antennas = defaultdict(list)
 
     for i in range(len(grid)):
