@@ -23,17 +23,20 @@ def operate(fields: list, value: int, target: int) -> bool:
         return value == target
 
     if value > 0:
-        product = value * fields[0]
-        if operate(fields[1:], product, target): return True
-
-        sum = value + fields[0]
-        if operate(fields[1:], sum, target): return True
+        left, right = value, fields[0]
+        fields = fields[1:]
     else:
-        product = fields[0] * fields[1]
-        if operate(fields[2:], product, target): return True
+        left, right = fields[0], fields[1]
+        fields = fields[2:]
 
-        sum = fields[0] + fields[1]
-        if operate(fields[2:], sum, target): return True
+    intermediate = left * right
+    if operate(fields, intermediate, target): return True
+
+    intermediate = left + right
+    if operate(fields, intermediate, target): return True
+
+    intermediate = int(str(left) + str(right))
+    if operate(fields, intermediate, target): return True
 
 
 def main():
@@ -47,7 +50,6 @@ def main():
         if line == "":
             continue
 
-        print(f"Processing: {line}")
         try:
             values = line.split(":")
             target = int(values[0])
@@ -55,11 +57,12 @@ def main():
 
             if operate(numbers, 0, target):
                 sums += target
-                # print(f"{numbers} can reach {target}")
         except ValueError as ex:
             print(f"Line {line} [{values}] is invalid. {ex}")
             continue
 
+    # Part 1: 2654749936343
+    # Part 2: 124060392153684
     print(f"Calibration result: {sums}")
 
 
