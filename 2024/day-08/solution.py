@@ -47,28 +47,52 @@ def main():
     rows = len(grid)
     cols = len(grid[0])
     antennas = map_grid(grid)
+
+    # Debugging: Print antenna sites
+    # for antenna in antennas:
+    #     print(f"{antenna}: {antennas[antenna]}")
+
     antinodes = set()
     for antenna in antennas:
         for a, b in itertools.combinations(antennas[antenna], 2):
-            distance = (a[0] - b[0], a[1] - b[1])
+            # For part 2, antipoles extend to the end of the grid
+            # and include antenna sites
+            slope = (b[0] - a[0], b[1]-a[1])
 
-            x, y = (a[0] + distance[0], a[1] + distance[1])
-            if 0<= x < rows and 0 <= y < cols:
-                antinodes.add((x, y))
+            # Add the antenna sites themselves
+            antinodes.add(a)
+            antinodes.add(b)
 
-            x, y = (b[0] - distance[0], b[1] - distance[1])
-            if 0<= x < rows and 0 <= y < cols:
-                antinodes.add((x, y))
+            # Negative slope
+            (x, y) = (a[0] - slope[0], a[1] - slope[1])
+            while True:
+                if not (0<= x < rows and 0 <= y < cols):
+                    break
+                if grid[x][y] == "." or grid[x][y] == antenna:
+                    antinodes.add((x, y))
+                    grid[x][y] = "#"
+                (x, y) = (x - slope[0], y - slope[1])
+
+            # Positive slope
+            (x, y) = (b[0] + slope[0], b[1] + slope[1])
+            while True:
+                if not (0<= x < rows and 0 <= y < cols):
+                    break
+                if grid[x][y] == "." or grid[x][y] == antenna:
+                    antinodes.add((x, y))
+                    grid[x][y] = "#"
+                (x, y) = (x + slope[0], y + slope[1])
 
     # Debugging: Print the grid with antinodes
     # for antinode in antinodes:
     #     if grid[antinode[0]][antinode[1]] == ".":
     #         grid[antinode[0]][antinode[1]] = "#"
-    # for row in grid:
-    #     print(f"{row}")
+    for row in grid:
+        print(f"{row}")
 
     # Part 1: 327
-    print(f"\nAntinodes: {len(antinodes)}")
+    # Part 2: 1233
+    print(f"Antinodes: {len(antinodes)}")
 
 
 main()
