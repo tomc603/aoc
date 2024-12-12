@@ -11,7 +11,14 @@ TEST_INPUT="""190: 10 19
 292: 11 6 16 20"""
 
 
-def operate(fields: list, value: int, target: int) -> int:
+def operate(fields: list, value: int, target: int) -> bool:
+    """
+    Compute the possible values for a list of numbers from left to right (not PEMDAS), and compare to the target value
+    :param fields: List of numbers to operate with
+    :param value: The current accumulated value from previous rounds
+    :param target: Final desired value
+    :return: True if the numbers in fields can achieve the target value
+    """
     if len(fields) == 0:
         return value == target
 
