@@ -11,6 +11,36 @@ TEST_INPUT="""190: 10 19
 292: 11 6 16 20"""
 
 
+def mul(a: int, b: int) -> int:
+    """
+    Calculate the product of a and b
+    :param a: Multiplicand
+    :param b: Multiplier
+    :return: Product of a and b
+    """
+    return a*b
+
+
+def add(a: int, b: int) -> int:
+    """
+    Calculate the sum of a and b
+    :param a: Augend
+    :param b: Addend
+    :return: Sum of a and b
+    """
+    return a+b
+
+
+def cat(a: int, b: int) -> int:
+    """
+    Concatenate a and b
+    :param a: High order operand
+    :param b: Low order operand
+    :return: Concatenation of a and b
+    """
+    return int(str(a) + str(b))
+
+
 def operate(fields: list, value: int, target: int) -> bool:
     """
     Compute the possible values for a list of numbers from left to right (not PEMDAS), and compare to the target value
@@ -29,14 +59,9 @@ def operate(fields: list, value: int, target: int) -> bool:
         left, right = fields[0], fields[1]
         fields = fields[2:]
 
-    intermediate = left * right
-    if operate(fields, intermediate, target): return True
-
-    intermediate = left + right
-    if operate(fields, intermediate, target): return True
-
-    intermediate = int(str(left) + str(right))
-    if operate(fields, intermediate, target): return True
+    for operation in [mul, add, cat]:
+        intermediate = operation(left, right)
+        if operate(fields, intermediate, target): return True
 
 
 def main():
